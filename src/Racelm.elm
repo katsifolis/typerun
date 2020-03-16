@@ -1,7 +1,7 @@
 -- A Typeracer Clone in Elm --
 module Racelm exposing (main)
 
-import Html exposing (div, h1, h2, img, text, button, input)
+import Html exposing (div, h1, h2, img, text, button, input, p)
 import Time
 import Browser
 import Html.Attributes exposing (..)
@@ -21,7 +21,7 @@ type Msg
 init : Model
 init =
     { inputText = "" 
-    , raceText = "Read me"
+    , raceText = "this is a very difficult task!"
     , textColor = "black"
     , end = False
     }
@@ -29,16 +29,25 @@ init =
 determineColor model = 
     case model.textColor of
         "red" -> 
-            h1 [style "color" "red" ] [ text model.raceText ]
+            h1 [ style "color" "red", style "border" "3px solid #000" ] [ text model.raceText ]
         "green" ->
-            h1 [style "color" "green" ] [ text model.raceText ]
+            h1 [ style "color" "green", style "border" "3px solid #000" ] [ text model.raceText ]
         "blue"  ->
-            h1 [style "color" "blue" ] [ text model.raceText ]
+            h1 [ style "color" "blue",  style "border" "3px solid #000" ] [ text model.raceText ]
         _  ->
-            h1 [style "color" "blue" ] [ text model.raceText ]
+            h1 [ style "color" "blue",  style "border" "3px solid #000" ] [ text model.raceText ]
 
 -- VIEW
 view model = 
+        div []
+            [ h1 [ style "text-align" "center" ] 
+                 [ text "A type racing game" ]
+            , bigDaddy model
+            ]
+
+-- UPDATE
+
+bigDaddy model =
     div [style "text-align" "center"
         , style "position" "fixed"
         , style "top" "50%" 
@@ -50,24 +59,24 @@ view model =
     , endMessage model 
     ]
 
--- UPDATE
 
 textBox model = 
     input [ value model.inputText
-          , placeholder "Text to write"
+          , autofocus True
           , onInput Check  
           , style "outline" "none"
           , style "text-align" "center"
-          , style "border" "2px solid #fef"
-          , style "border-radius" "25px"
+          , style "border" "none"
+          , style "font-size" "28px"
           , style "width" "200px"
+          , style "color" "#000"
           , style "margin-top" "50px"
           ]
           []
 
 endMessage model =
     if model.end == True then
-        div [] [ h2 [] [ text "YOU WON MAN" ] ]
+        div [] [ h2 [] [ text "Press [SPACE] to continue" ] ]
     else
         div [][]
 

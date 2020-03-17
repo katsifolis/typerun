@@ -18,32 +18,36 @@ type alias Model =
 type Msg 
     = Check String
 
-init : Model
-init =
-    { inputText = "" 
-    , raceText = "this is a very difficult task!"
-    , textColor = "black"
-    , end = False
-    }
+keyDecoder : D.Decoder String
+keyDecoder =
+        D.field "key" D.string
+
+init : () -> (Model, Cmd Msg)
+init _ =
+    ( 
+        { inputText = "" 
+        , raceText = "this is a very difficult task!"
+        , textColor = "black"
+        , end = False
+        }
+    , Cmd.none
+    )
 
 determineColor model = 
     case model.textColor of
         "red" -> 
-            h1 [ style "color" "red", style "border" "3px solid #000" ] [ text model.raceText ]
+            h1 [ style "color" "red" ] [ text model.raceText ]
         "green" ->
-            h1 [ style "color" "green", style "border" "3px solid #000" ] [ text model.raceText ]
+            h1 [ style "color" "green" ] [ text model.raceText ]
         "blue"  ->
-            h1 [ style "color" "blue",  style "border" "3px solid #000" ] [ text model.raceText ]
+            h1 [ style "color" "blue" ] [ text model.raceText ]
         _  ->
-            h1 [ style "color" "blue",  style "border" "3px solid #000" ] [ text model.raceText ]
+            h1 [ style "color" "blue" ] [ text model.raceText ]
 
 -- VIEW
 view model = 
-        div []
-            [ h1 [ style "text-align" "center" ] 
-                 [ text "A type racing game" ]
-            , bigDaddy model
-            ]
+    div []
+        [ bigDaddy model ]
 
 -- UPDATE
 
@@ -54,7 +58,8 @@ bigDaddy model =
         , style "left" "50%" 
         , style "transform" "translate(-50%, -50%)"
         ]
-    [ determineColor model
+    [ img [ src "assets/eva.gif", width 250, height 200, style "border-radius" "30px"] []
+    , determineColor model
     , textBox model
     , endMessage model 
     ]
@@ -81,7 +86,7 @@ endMessage model =
         div [][]
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     let 
         inputText = model.inputText
@@ -94,15 +99,21 @@ update msg model =
                     eq = String.startsWith s model.raceText
                 in 
                     if s == raceText then 
-                        { model | textColor = "green", end = True} 
+                        ({ model | textColor = "green", inputText = s, end = True} , Cmd.none)
                     else if end == True then
-                        { model | inputText = "", raceText = "HOHOHO",  end = False }
+                        ({ model | inputText = "", raceText = "HOHOHO",  end = False }, Cmd.none)
                     else
-                        { model | inputText = s }
+                        ({ model | inputText = s }, Cmd.none)
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
 
 main =
-    Browser.sandbox
+    Browser.element
         { init = init
         , view = view
         , update = update
+        , subscriptions = subscriptions
         }

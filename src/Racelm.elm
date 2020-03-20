@@ -1,8 +1,8 @@
 -- A Typeracer Clone in Elm --
-module Racelm exposing (main)
+module Racelm exposing (..)
 
 import Html exposing (div, h1, h2, img, text, button, input, p)
-import Time
+import Random
 import Browser
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
@@ -13,24 +13,37 @@ type alias Model =
     , inputText : String
     , textColor : String
     , end       : Bool
+    , rng       : Int
     }
 
 type Msg 
     = Check String
+    | RandString Int
 
-keyDecoder : D.Decoder String
-keyDecoder =
-        D.field "key" D.string
 
+getText n =
+    case n of
+        1 -> "Live as if you were to die tomorrow. Learn as if you were to live forever."
+        2 -> "That which does not kill us makes us stronger."
+        3 -> "We must not allow other people's limited perceptions to define us."
+        4 -> "Do what you can, with what you have, where you are."
+        5 -> "Be yourself; everyone else is already taken."
+        6 -> "Wise men speak because they have something to say; fools because they have to say something."
+        7 -> "Strive not to be a success, but rather to be of value."
+        8 -> "The difference between ordinary and extraordinary is that little extra."
+        9 -> "Too many of us are not living our dreams because we are living our fears."
+        _ -> "HEHEHEHE"
+ 
 init : () -> (Model, Cmd Msg)
 init _ =
     ( 
         { inputText = "" 
-        , raceText = "this is a very difficult task!"
+        , raceText = "Type Friend and Enter"
         , textColor = "black"
         , end = False
+        , rng = 1
         }
-    , Cmd.none
+    , Random.generate RandString (Random.int 1 10)
     )
 
 determineColor model = 
@@ -58,7 +71,7 @@ bigDaddy model =
         , style "left" "50%" 
         , style "transform" "translate(-50%, -50%)"
         ]
-    [ img [ src "assets/eva.gif", width 250, height 200, style "border-radius" "30px"] []
+    [ img [ src "../assets/eva.gif", width 250, height 200, style "border-radius" "30px"] []
     , determineColor model
     , textBox model
     , endMessage model 
@@ -92,18 +105,23 @@ update msg model =
         inputText = model.inputText
         raceText = model.raceText
         end = model.end
+        rng = model.rng
     in
         case msg of
             Check s ->
                 let 
+                    tex = getText
                     eq = String.startsWith s model.raceText
                 in 
                     if s == raceText then 
-                        ({ model | textColor = "green", inputText = s, end = True} , Cmd.none)
+                        ({ model | textColor = "green", inputText = s, end = True} , Random.generate RandString (Random.int 1 10))
                     else if end == True then
-                        ({ model | inputText = "", raceText = "HOHOHO",  end = False }, Cmd.none)
+                        ({ model | inputText = "", raceText = (getText rng),  end = False }, Cmd.none)
                     else
                         ({ model | inputText = s }, Cmd.none)
+
+            RandString n ->
+                ({ model | rng = n}, Cmd.none)
 
 
 subscriptions : Model -> Sub Msg

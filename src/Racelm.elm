@@ -1,12 +1,11 @@
 -- A Typeracer Clone in Elm --
-module Racelm exposing (..)
+module Racelm exposing (main)
 
-import Html exposing (div, h1, h2, img, text, button, input, p)
+import Html exposing (div, h1, h2, img, text, input)
 import Random
 import Browser
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
-import Json.Decode as D
+import Html.Events exposing (onInput)
 
 type alias Model =
     { raceText  : String 
@@ -77,6 +76,22 @@ bigDaddy model =
     , endMessage model 
     ]
 
+clearInput : Model -> Bool
+clearInput model = 
+    let
+        word = model.raceText 
+            |> String.words
+            |> List.head
+        input = model.inputText
+        sameLength = String.length (Maybe.withDefault "" word)  == String.length input
+        
+    in
+        case word of
+            Nothing ->
+                False
+
+            Just w ->
+                String.contains input w && sameLength
 
 textBox model = 
     input [ value model.inputText
@@ -86,7 +101,7 @@ textBox model =
           , style "text-align" "center"
           , style "border" "none"
           , style "font-size" "28px"
-          , style "width" "200px"
+          , style "width" "auto"
           , style "color" "#000"
           , style "margin-top" "50px"
           ]
@@ -110,14 +125,26 @@ update msg model =
         case msg of
             Check s ->
                 let 
-                    tex = getText
                     eq = String.startsWith s model.raceText
                 in 
                     if s == raceText then 
                         ({ model | textColor = "green", inputText = s, end = True} , Random.generate RandString (Random.int 1 10))
                     else if end == True then
                         ({ model | inputText = "", raceText = (getText rng),  end = False }, Cmd.none)
-                    else
+                    else if clearInput model then
+                        let
+                            r =
+                                raceText
+                                |> String.words
+                                |> List.tail
+                        in
+                            case r of
+                                Nothing ->
+                                    ({model | inputText = ""}, Cmd.none)
+
+                                Just t ->
+                                    ({model | inputText = "", raceText = String.join " " t}, Cmd.none)
+                    else 
                         ({ model | inputText = s }, Cmd.none)
 
             RandString n ->
@@ -135,3 +162,7 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+
+-------Experimental------

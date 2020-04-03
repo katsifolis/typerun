@@ -70,7 +70,7 @@ bigDaddy model =
         , style "left" "50%" 
         , style "transform" "translate(-50%, -50%)"
         ]
-    [ img [ src "../assets/eva.gif", width 250, height 200, style "border-radius" "30px"] []
+    [ img [ src "assets/eva.gif", width 250, height 200, style "border-radius" "30px"] []
     , determineColor model
     , textBox model
     , endMessage model 

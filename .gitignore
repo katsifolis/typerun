@@ -2,3 +2,7 @@ elm-stuff/
 index.html
 racelm.js
 style.css
+zig-cache/
+zig-out/
+lib/
+test/

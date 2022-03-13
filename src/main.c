@@ -1,9 +1,3 @@
-/* TODO
-
-1. Size of space  is not the same width as the fonts
-
-*/
-
 #include <raylib.h>
 #include <stdio.h>
 #include <string.h>
@@ -29,6 +23,8 @@ init()
 /*    InitAudioDevice(); */
 }
 
+
+
 int
 main() 
 {
@@ -39,6 +35,8 @@ main()
     int key = 0; /* 32-bit integer */
     bool is_same  = false;
     uint8_t quote_len = strlen(quote) + 1;
+    bool show_end_msg = false;
+
 
     char* user_input = malloc((sizeof(char) * quote_len));
     memset(user_input, ' ', quote_len + 1);
@@ -48,14 +46,14 @@ main()
     memset(user_input_false, ' ', quote_len + 1);
     user_input_false[quote_len+1] = '\0';
 
-    SetTargetFPS(30);
+    SetTargetFPS(60);
 
     while (!WindowShouldClose()) {
 
         key = GetKeyPressed();
 
         while (key > 0) {
-            if ((key >= 32) && (key <= 125) && letterCount < quote_len) {
+            if ((key >= 32) && (key <= 125) && letterCount < quote_len && !show_end_msg) {
 
                 user_input[letterCount] = !IsKeyUp(KEY_LEFT_SHIFT) ? key : key | 0x20;
 
@@ -78,13 +76,24 @@ main()
 
             switch (key) {
             case KEY_BACKSPACE: 
-                if (letterCount < 1) {
-                    letterCount = 0;
-                } else {
-                    letterCount -= 1;
+                if (!show_end_msg) {
+                    if (letterCount < 1) {
+                        letterCount = 0;
+                    } else {
+                        letterCount -= 1;
+                    }
+                    user_input[letterCount] = ' ';
+                    user_input_false[letterCount] = ' ';
                 }
-                user_input[letterCount] = ' ';
-                user_input_false[letterCount] = ' ';
+                break;
+
+            case KEY_SPACE:
+                if (show_end_msg) {
+                    memset(user_input, ' ', quote_len + 1);
+                    letterCount = 0;
+                }
+                break;
+
             default: break;
             }
         
@@ -92,23 +101,17 @@ main()
         }
 
         /* Start all over again */
-        if (letterCount == quote_len - 1) {
-            if (GetKeyPressed() != KEY_SPACE) {}
-            user_input[letterCount] = KEY_SPACE;
-            letterCount++;
 
-        }
+        show_end_msg = letterCount == quote_len - 1;
 
-
-        /* Start Drawing */
         BeginDrawing();
 
-            ClearBackground((Color){0x08, 0x08, 0x08, 0xff});
+            ClearBackground((Color){0x11, 0x11, 0x11, 0xff});
 
-            if (letterCount == quote_len) {
-                memset(user_input, ' ', quote_len + 1);
-                letterCount = 0;
+            if (show_end_msg) {
+                DrawText("Gimme more", (screenWidth ) - (TextLength(quote) * FONT_SIZE), 10, FONT_SIZE, YELLOW);
             }
+
 
             /* Quote Text */
             DrawText(quote, 40, screenHeight / 2.0, FONT_SIZE, GRAY);
@@ -119,18 +122,12 @@ main()
             /* Colored True Text */
             DrawText(user_input, 40, screenHeight / 2.0, FONT_SIZE, BLUE);
 
-
-
         EndDrawing();
-        /* End Drawing */
-
     }
 
     /* Clean */
 
     free(user_input);
-
-    UnloadMusicStream(ambiance);
 
     CloseAudioDevice();
 

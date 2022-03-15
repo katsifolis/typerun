@@ -4,26 +4,26 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <math.h>
 
-const int screenWidth = 640;
-const int screenHeight = 480;
-char *quote = "I must not fear.\nFear is the mind killer.";
-const int FONT_SIZE = 40;
+const int screenWidth = 800;
+const int screenHeight = 600;
+char *quote = "I must not fear.\nHello there";
+const int FONT_SIZE = 60;
 const int WMODIFIER = screenWidth / FONT_SIZE;
+const char *end_message = "Press [Space] To Continue";
+Font font;
+Vector2 end_message_vec;
 
 void
 init() 
 {
     SetTraceLogLevel(LOG_NONE);
 
-    InitWindow(screenWidth, screenHeight, "T P R");
+    InitWindow(screenWidth, screenHeight, "TypeRun");
 
     SetWindowState(FLAG_WINDOW_RESIZABLE);
-
-/*    InitAudioDevice(); */
 }
-
-
 
 int
 main() 
@@ -36,13 +36,18 @@ main()
     bool is_same  = false;
     uint8_t quote_len = strlen(quote) + 1;
     bool show_end_msg = false;
-
+    Font font = LoadFontEx("/usr/share/fonts/ubuntu/UbuntuMono-R.ttf", 60, 0, 0);
+    const Vector2 end_message_vec = MeasureTextEx(font, end_message, 40, 1);
 
     char* user_input = malloc((sizeof(char) * quote_len));
+    char* user_input_false = malloc((sizeof(char) * quote_len));
+    
+
+    SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
+
     memset(user_input, ' ', quote_len + 1);
     user_input[quote_len+1] = '\0';
 
-    char* user_input_false = malloc((sizeof(char) * quote_len));
     memset(user_input_false, ' ', quote_len + 1);
     user_input_false[quote_len+1] = '\0';
 
@@ -100,34 +105,29 @@ main()
             key = GetKeyPressed();
         }
 
-        /* Start all over again */
-
         show_end_msg = letterCount == quote_len - 1;
 
         BeginDrawing();
 
             ClearBackground((Color){0x11, 0x11, 0x11, 0xff});
 
+            // Checks for end msg and draws it
+
             if (show_end_msg) {
-                DrawText("Gimme more", (screenWidth ) - (TextLength(quote) * FONT_SIZE), 10, FONT_SIZE, YELLOW);
+                DrawTextEx(font, end_message, (Vector2){(screenWidth / 2.0) - ceil(end_message_vec.x / 2.0), 20}, 40,1 , (Color){0x33, 0x33, 0x33, 0xff});
             }
 
+            DrawTextEx(font, quote, (Vector2){FONT_SIZE, screenHeight / 2.0}, FONT_SIZE, 1, GRAY);
 
-            /* Quote Text */
-            DrawText(quote, 40, screenHeight / 2.0, FONT_SIZE, GRAY);
+            DrawTextEx(font, user_input_false, (Vector2){FONT_SIZE, screenHeight / 2.0}, FONT_SIZE, 1, RED);
 
-            /* Colored False Text */
-            DrawText(user_input_false, 40, screenHeight / 2.0, FONT_SIZE, RED);
-
-            /* Colored True Text */
-            DrawText(user_input, 40, screenHeight / 2.0, FONT_SIZE, BLUE);
+            DrawTextEx(font, user_input, (Vector2){FONT_SIZE, screenHeight / 2.0}, FONT_SIZE, 1, BLUE);
 
         EndDrawing();
     }
 
-    /* Clean */
-
     free(user_input);
+    free(user_input_false);
 
     CloseAudioDevice();
 
